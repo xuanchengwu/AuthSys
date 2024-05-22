@@ -77,7 +77,7 @@ class AuthSysApplicationTests {
         // Create UserAccessRequest
         UserAccessRequest accessRequest = new UserAccessRequest();
         accessRequest.setUserId(Long.valueOf("123456"));
-        accessRequest.setEndpoints(List.of("resource A", "resource B", "resource C", "resource D"));
+        accessRequest.setEndpoints(List.of("resource A", "resource B", "resource C"));
 
         // Call the service method to update user access
         adminService.updateUserAccess("123456", accessRequest);
@@ -86,7 +86,7 @@ class AuthSysApplicationTests {
 
         String currentContent = Files.readString(file.toPath());
         logger.info("Current content of users.json in test:\n{}", currentContent);
-        List<CustomUserDetails> users = objectMapper.readValue(file, new TypeReference<List<CustomUserDetails>>() {});
+        List<CustomUserDetails> users = objectMapper.readValue(file, new TypeReference<>() {});
         CustomUserDetails updatedUser = users.stream()
                 .filter(user -> "123456".equals(user.getUserId()))
                 .findFirst()
@@ -94,7 +94,7 @@ class AuthSysApplicationTests {
 
         assert updatedUser != null;
         assertNotNull(updatedUser, "User should be present in the file");
-        assertEquals(List.of("resource A", "resource B", "resource C", "resource D"), updatedUser.getEndpoints(), "Endpoints should match");
+        assertEquals(List.of("resource A", "resource B", "resource C"), updatedUser.getEndpoints(), "Endpoints should match");
 
         logger.info("Updated user access: {}", objectMapper.writeValueAsString(updatedUser));
         String currentContent2 = Files.readString(file.toPath());

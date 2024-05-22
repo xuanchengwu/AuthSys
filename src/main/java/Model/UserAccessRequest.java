@@ -9,7 +9,7 @@ public class UserAccessRequest {
 
     private Long userId;
 
-    private List<String> endpoint;
+    private List<String> endpoints;
 
     // Getters and Setters
     public Long getUserId() {
@@ -21,10 +21,10 @@ public class UserAccessRequest {
     }
 
     public List<String> getEndpoint() {
-        return endpoint;
+        return endpoints;
     }
 
     public void setEndpoints(List<String> endpoint) {
-        this.endpoint = endpoint;
+        this.endpoints = endpoint;
     }
 }

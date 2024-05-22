@@ -13,11 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +31,7 @@ public class AdminServices {
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     private final Map<String, CustomUserDetails> userDetailsMap = new ConcurrentHashMap<>();
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private static final String USER_DATA_FILE = "users.json";
 
     File file = new ClassPathResource(USER_DATA_FILE).getFile();
@@ -48,7 +51,7 @@ public class AdminServices {
         try {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(USER_DATA_FILE);
             if (inputStream != null) {
-                List<CustomUserDetails> users = objectMapper.readValue(inputStream, new TypeReference<List<CustomUserDetails>>() {});
+                List<CustomUserDetails> users = objectMapper.readValue(inputStream, new TypeReference<>() {});
                 for (CustomUserDetails user : users) {
                     userDetailsMap.put(user.getUserId(), user);
                 }
@@ -61,16 +64,6 @@ public class AdminServices {
         }
     }
 
-    public String getAdminInfo() {
-        logger.info("AdminServices.getAdminInfo is loaded");
-        return "Access granted for admin.";
-    }
-
-    public String addUser() throws IOException {
-        logger.info("AdminServices.addUser is loaded");
-
-        return "User added.";
-    }
 
 
     public void addUserAccess(@NotNull UserAccessRequest request) throws IOException {
@@ -83,7 +76,11 @@ public class AdminServices {
             saveUserData();
             logger.info("Access granted for user ID {} to resources: {}", request.getUserId(), request.getEndpoint());
         } else {
+            // Handle the case where the user is not found
+
+
             logger.warn("User ID {} not found", request.getUserId());
+            return;
         }
     }
 
@@ -106,6 +103,9 @@ public class AdminServices {
             String currentContent1 = Files.readString(file.toPath());
             logger.info("Current content of users.json before update:\n{}", currentContent1);
 
+            Path filePath = Paths.get(file.getAbsolutePath());
+            Path tempFilePath = Paths.get(file.getParent(), "temp_users.json");
+
 
             //check if file is writable
             if (!file.canWrite()) {
@@ -115,37 +115,39 @@ public class AdminServices {
 
 
 
-            String testString = "This is a test write operation to the file.";
-            try (FileWriter fileWriter = new FileWriter(file)) {
-                fileWriter.write(testString);
-                logger.info("Test write successful. Written data: {}", testString);
-                String currentContent2 = Files.readString(file.toPath());
-                logger.info("Current content of users.json after teststring:\n{}", currentContent2);
-            }
-
-
-
             Collection<CustomUserDetails> users = userDetailsMap.values();
-
-            // Log the values being written to the file
             ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
             String jsonString = writer.writeValueAsString(users);
-            logger.info("Writing the following data to users.json:\n{}", jsonString);
+            logger.info("Writing the following data to temp_users.json:\n{}", jsonString);
 
-            objectMapper.writeValue(file, users);
-            logger.info("Successfully saved users.json");
-            String currentContent3 = Files.readString(file.toPath());
-            logger.info("Current content of users.json before update2:\n{}", currentContent3);
+            // Write to a temporary file first
+            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(tempFilePath)) {
+                bufferedWriter.write(jsonString);
+                bufferedWriter.flush();
+                logger.info("Successfully wrote to temp_users.json");
+            } catch (IOException e) {
+                logger.error("Error writing to temp_users.json", e);
+                return;
+            }
+
+            // Replace the original file with the temporary file
+            try {
+                Files.move(tempFilePath, filePath, StandardCopyOption.REPLACE_EXISTING);
+                logger.info("Successfully replaced the original users.json with the new data");
+            } catch (IOException e) {
+                logger.error("Error replacing the original users.json with the new data", e);
+            }
+
+            String currentContent = Files.readString(filePath);
+            logger.info("Current content of users.json after update:\n{}", currentContent);
+
         } catch (IOException e) {
+            // Handle the case where the file cannot be written
             logger.error("Error saving users.json", e);
+            return;
         }
 
     }
 
-//    private void printLoadedUserData() {
-//        userDetailsMap.forEach((userId, userDetails) -> {
-//            logger.info("Loaded User - ID: {}, AccountName: {}, Role: {}, Resources: {}",
-//                    userId, userDetails.getAccountName(), userDetails.getRole(), userDetails.getEndpoints());
-//        });
-//    }
+
 }

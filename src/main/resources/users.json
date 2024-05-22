@@ -10,5 +10,12 @@
     "accountName": "JaneSmith",
     "role": "USER",
     "endpoints" : [ "resource A", "resource B"]
+  },
+
+  {
+    "userId": "123",
+    "accountName": "MaryShaw",
+    "role": "USER",
+    "endpoints" : [ "resource A", "resource B"]
   }
 ]
