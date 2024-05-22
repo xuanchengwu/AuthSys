@@ -1,0 +1,14 @@
+[
+  {
+    "userId": "123456",
+    "accountName": "JohnDoe",
+    "role": "ADMIN",
+    "endpoints": ["resource A"]
+  },
+  {
+    "userId": "789012",
+    "accountName": "JaneSmith",
+    "role": "USER",
+    "endpoints" : [ "resource A", "resource B"]
+  }
+]

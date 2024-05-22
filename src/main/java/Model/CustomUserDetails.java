@@ -1,9 +1,21 @@
 package Model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+
 public class CustomUserDetails {
+
+    @JsonProperty("userId")
     private String userId;
+
+    @JsonProperty("accountName")
     private String accountName;
+    @JsonProperty("role")
     private Role role;
+
+    @JsonProperty("endpoints")
+    private List<String> endpoints;
 
     public CustomUserDetails() {
     }
@@ -38,6 +50,17 @@ public class CustomUserDetails {
         this.role = role;
     }
 
+    // set resource access for user
+
+
+    public List<String> getEndpoints() {
+        return endpoints;
+    }
+
+    public void setEndpoints(List<String> endpoints) {
+        this.endpoints = endpoints;
+    }
+
     @Override
     public String toString() {
         return "  CustomUserDetails { " +
@@ -46,5 +69,7 @@ public class CustomUserDetails {
                 ", role=" + role +
                 '}';
     }
+
+
 }
 

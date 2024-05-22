@@ -1,9 +1,14 @@
 package Model;
 
+
+
+
 import java.util.List;
 
 public class UserAccessRequest {
+
     private Long userId;
+
     private List<String> endpoint;
 
     // Getters and Setters
@@ -19,7 +24,7 @@ public class UserAccessRequest {
         return endpoint;
     }
 
-    public void setEndpoint(List<String> endpoint) {
+    public void setEndpoints(List<String> endpoint) {
         this.endpoint = endpoint;
     }
 }

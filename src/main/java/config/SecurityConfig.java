@@ -26,8 +26,9 @@ public class SecurityConfig{
                 .addFilterBefore(base64AuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "USER")
-                                .requestMatchers("/admin/addUser").hasRole("ADMIN") // Only admins can access /admin/addUser
+                                .requestMatchers("/admin/addUser").hasRole("ADMIN")// Only admins can access /admin/addUser
+                                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "USER") // Both admins and users can access /admin/**
+                                .requestMatchers("/user/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

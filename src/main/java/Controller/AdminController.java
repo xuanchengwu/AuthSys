@@ -7,6 +7,7 @@ import Service.AdminServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,15 +18,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 public class AdminController {
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
+
     private final AdminServices adminService;
     @Autowired
-    public AdminController(AdminServices adminService) {
+    public AdminController(@Qualifier("adminServices") AdminServices _adminService) {
 
-        this.adminService = adminService;
+        this.adminService = _adminService;
         logger.info("AdminController is loaded");
     }
 
@@ -58,12 +62,13 @@ public class AdminController {
     }
 
     @PostMapping("/admin/addUser")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> addUser(@RequestBody UserAccessRequest request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserAccessRequest> addUser(@RequestBody UserAccessRequest request) throws IOException {
         // Logic to add access to resources for the user
         // For demonstration, assume the service call is successful
         logger.info("Adding User Access to resources: " + request.getEndpoint() + " for user ID " + request.getUserId());
-        return ResponseEntity.ok("Access granted for user ID " + request.getUserId() + " to resources: " + request.getEndpoint());
+        adminService.addUserAccess(request);
+        return ResponseEntity.ok(request);
     }
 
 }
